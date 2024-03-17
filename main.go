@@ -111,10 +111,10 @@ func (cs *CoffeeShop) Start() {
 							if !brewer.busy {
 								coffee := brewer.Brew(groundBeans)
 								fmt.Printf("Order %d completed: %d ounces of coffee\n", order.id, coffee.size)
-								break
+								break // Exit the loop early, as we've found our available brewer
 							}
 						}
-						break
+						break // Exit the loop early, as we've found our available grinder
 					}
 				}
 
