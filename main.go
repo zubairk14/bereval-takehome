@@ -147,7 +147,6 @@ func main() {
 	numCustomers := 10
 	for i := 0; i < numCustomers; i++ {
 		// in parallel, all at once, make calls to MakeCoffee
-		fmt.Printf("i: %d \n", i)
 		orderId := i
 		go func() {
 			cs.MakeCoffee(Order{
