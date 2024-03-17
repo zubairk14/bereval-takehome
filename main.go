@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Beans struct {
@@ -27,7 +29,7 @@ type Brewer struct {
 }
 
 type Order struct {
-	id                   int // maybe uuid
+	id                   uuid.UUID // maybe uuid
 	ouncesOfCoffeeWanted int
 	coffeeStrength       int // grams of beans per ounce of coffee (default to 2g)
 }
@@ -89,7 +91,7 @@ func NewCoffeeShop(grinders []*Grinder, brewers []*Brewer, baristas int) *Coffee
 }
 
 func (cs *CoffeeShop) MakeCoffee(order Order) {
-	fmt.Printf("Placing order ID %d for %d ounces of coffee onto the channel\n", order.id, order.ouncesOfCoffeeWanted)
+	fmt.Printf("Placing order ID %+v for %d ounces of coffee onto the channel. \n", order.id, order.ouncesOfCoffeeWanted)
 	go func() {
 		cs.orders <- order
 	}()
@@ -100,7 +102,7 @@ func (cs *CoffeeShop) Start() {
 		go func(id int) {
 			for order := range cs.orders {
 				// process order
-				fmt.Printf("Barista %d is processing order %d\n", id, order.id)
+				fmt.Printf("Barista %d is processing order %+v \n", id, order.id)
 				// find available grinder
 				for _, grinder := range cs.grinders {
 					if !grinder.busy {
@@ -110,7 +112,7 @@ func (cs *CoffeeShop) Start() {
 						for _, brewer := range cs.brewers {
 							if !brewer.busy {
 								coffee := brewer.Brew(groundBeans)
-								fmt.Printf("Order %d completed: %d ounces of coffee\n", order.id, coffee.size)
+								fmt.Printf("Order %+v completed: %d ounces of coffee\n", order.id, coffee.size)
 								break // Exit the loop early, as we've found our available brewer
 							}
 						}
@@ -147,10 +149,9 @@ func main() {
 	numCustomers := 10
 	for i := 0; i < numCustomers; i++ {
 		// in parallel, all at once, make calls to MakeCoffee
-		orderId := i
 		go func() {
 			cs.MakeCoffee(Order{
-				id:                   orderId + 1,
+				id:                   uuid.New(),
 				ouncesOfCoffeeWanted: 12,
 				coffeeStrength:       2,
 			})
