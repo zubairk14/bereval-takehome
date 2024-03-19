@@ -76,7 +76,13 @@ func (b *Brewer) Brew(beans Beans) Coffee {
 	}()
 	// Calculate brewing time, assume we need 6 ounces of water for every 12 grams of beans
 	ouncesOfWater := 6 * (beans.weightGrams / 12)
-	timeToBrew := time.Duration(ouncesOfWater/b.ouncesWaterPerSecond) * time.Second
+
+	waterPerSecond := b.ouncesWaterPerSecond
+	if b.ouncesWaterPerSecond > b.maxWaterPerSecond {
+		waterPerSecond = b.maxWaterPerSecond
+	}
+
+	timeToBrew := time.Duration(ouncesOfWater/waterPerSecond) * time.Second
 	time.Sleep(timeToBrew)
 	return Coffee{size: ouncesOfWater}
 }
@@ -139,8 +145,8 @@ func main() {
 	g2 := &Grinder{gramsPerSecond: 3}
 	g3 := &Grinder{gramsPerSecond: 12}
 
-	b1 := &Brewer{ouncesWaterPerSecond: 100}
-	b2 := &Brewer{ouncesWaterPerSecond: 25}
+	b1 := &Brewer{ouncesWaterPerSecond: 100, maxWaterPerSecond: 100}
+	b2 := &Brewer{ouncesWaterPerSecond: 25, maxWaterPerSecond: 100}
 
 	cs := NewCoffeeShop([]*Grinder{g1, g2, g3}, []*Brewer{b1, b2}, 2)
 
@@ -158,7 +164,7 @@ func main() {
 		}()
 	}
 
-	time.Sleep(10 * time.Second) // Wait some time for orders to be processed
+	time.Sleep(30 * time.Second) // Wait some time for orders to be processed
 	// Issues with the above
 	// 1. Assumes that we have unlimited amounts of grinders and brewers.
 	//		- How do we build in logic that takes into account that a given Grinder or Brewer is busy?
